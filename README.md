@@ -1,6 +1,8 @@
 # Vision Language Model (Llava) ONNX Inference & Model Loader
 
-This repository provides Python scripts to run inference with a specific Vision Language Model (based on Llava/Qwen architectures) using ONNX Runtime. It includes functionality for handling both image and video inputs, configurable decoding strategies, flexible quantization settings (including separate settings per model component), and a benchmark script for the InfoVQA dataset.
+This repository provides Python scripts to run inference with LlaVa-onevision (based on Llava/Qwen architectures) using ONNX Runtime. It includes functionality for handling both image and video inputs, configurable decoding strategies, flexible quantization settings (including separate settings per model component), and a benchmark script for the InfoVQA dataset.
+
+## Author is still working on this instruction and uploading......
 
 ## Features
 
