@@ -1,0 +1,6 @@
+__pycache__/
+coco_dataset/
+vqa_dataset/
+models/
+**/logs/
+**/results/
