@@ -20,6 +20,13 @@ if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
 NUM_GPUS = 8
 
+mode = 'val'
+
+if mode == 'train':
+    vqa_json = vqa_train
+elif mode == 'val':
+    vqa_json = vqa_val
+
 INPUT_TYPE = 'image'
 Q_EMBED = "q4f16"
 Q_VISION = "fp16"
@@ -27,7 +34,7 @@ Q_DECODER = "q4f16"
 DECODING_STRATEGY = "beam"
 NUM_BEAMS = 4
 
-with open(vqa_train, 'rb') as f:
+with open(vqa_json, 'rb') as f:
     gt_json = json.load(f)
 gt_questions = gt_json['data']
 
@@ -62,7 +69,7 @@ def run_inference(args):
         USER_PROMPT = v['question']
         INPUT_FILE = os.path.join(DATASET_DIR, v['image_local_name'])
 
-        logger.info(f"Running inference on {INPUT_FILE} (Type: {INPUT_TYPE})...")
+        logger.info(f"Processing Question: {USER_PROMPT} | Image: {INPUT_FILE}")
         generated_text, gen_time = model.generate(
             input_path=INPUT_FILE,
             user_prompt=USER_PROMPT,
@@ -95,7 +102,7 @@ if __name__ == '__main__':
     for sub_results in all_results:
         final_results.extend(sub_results)
 
-    with open(os.path.join(OUTPUT_DIR, 'results.json'), 'w') as f:
+    with open(os.path.join(OUTPUT_DIR, f"results_{mode}.json"), 'w') as f:
         json.dump(final_results, f, indent=4)
 
-    print(f"Completed inference on {len(final_results)} questions. Results saved to {OUTPUT_DIR}/results.json")
+    print(f"Completed inference on {len(final_results)} questions. Results saved to {OUTPUT_DIR}/results_{mode}.json")

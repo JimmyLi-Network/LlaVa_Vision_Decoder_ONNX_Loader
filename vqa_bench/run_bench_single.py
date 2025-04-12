@@ -26,11 +26,19 @@ logger = logging.getLogger(__name__)
 MODEL_DIR = os.path.join('..', 'models', 'onnx')
 DATASET_DIR = os.path.join('..','vqa_dataset', 'images')
 vqa_train = os.path.join(os.path.dirname(__file__), 'gt', 'infographicVQA_train_v1.0.json')
-vqa_test = os.path.join(os.path.dirname(__file__), 'gt', 'infographicVQA_test_v1.0.json')
-OUTPUT_DIR = os.path.join('results')
+vqa_val = os.path.join(os.path.dirname(__file__), 'gt', 'infographicVQA_val_v1.0.json')
+OUTPUT_DIR = os.path.join('model_outputs')
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
 nums_gpus = 1
+
+mode = 'val'
+
+if mode == 'train':
+    vqa_json = vqa_train
+elif mode == 'val':
+    vqa_json = vqa_val
+
 
 # --- Input Settings ---
 INPUT_TYPE = 'image'   # MODIFY ('image' or 'video')
@@ -45,7 +53,7 @@ DECODING_STRATEGY = "beam"
 NUM_BEAMS = 4
 
 # --- Load Input ---
-with open (vqa_train, 'rb') as f:
+with open (vqa_json, 'rb') as f:
     gt_json = json.load(f)
 gt_questions = gt_json['data']
 
@@ -70,7 +78,7 @@ for k, v in enumerate(gt_questions):
     INPUT_FILE = os.path.join(DATASET_DIR, v['image_local_name'])
 
     # --- Run Inference ---
-    print(f"Running inference on {INPUT_FILE} (Type: {INPUT_TYPE})...")
+    logger.info(f"Processing Question: {USER_PROMPT} | Image: {INPUT_FILE}")
     generated_text, gen_time = model.generate(
         input_path=INPUT_FILE,
         user_prompt=USER_PROMPT,
@@ -92,8 +100,9 @@ for k, v in enumerate(gt_questions):
         print("Generation failed.")
 
 # --- Save Results ---
-with open(os.path.join(OUTPUT_DIR, 'results.json'), 'w') as f:
+with open(os.path.join(OUTPUT_DIR, f"results_{mode}.json"), 'w') as f:
     json.dump(results, f, indent=4)
+    print(f"Results saved to {os.path.join(OUTPUT_DIR, f'results_{mode}.json')}")
 
 if model:
     model.close()
