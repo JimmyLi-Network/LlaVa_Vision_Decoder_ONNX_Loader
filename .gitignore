@@ -4,3 +4,4 @@ vqa_dataset/
 models/
 **/logs/
 **/results/
+**/model_outputs/
