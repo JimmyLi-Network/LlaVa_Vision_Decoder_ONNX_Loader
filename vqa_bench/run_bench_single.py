@@ -99,10 +99,12 @@ for k, v in enumerate(gt_questions):
     else:
         print("Generation failed.")
 
+output_filename = f"results_emb{Q_EMBED}_vis{Q_VISION}_dec{Q_DECODER}_{mode}.json"
+
 # --- Save Results ---
-with open(os.path.join(OUTPUT_DIR, f"results_{mode}.json"), 'w') as f:
+with open(os.path.join(OUTPUT_DIR, output_filename), 'w') as f:
     json.dump(results, f, indent=4)
-    print(f"Results saved to {os.path.join(OUTPUT_DIR, f'results_{mode}.json')}")
+    print(f"Results saved to {os.path.join(OUTPUT_DIR, output_filename)}")
 
 if model:
     model.close()

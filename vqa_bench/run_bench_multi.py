@@ -102,7 +102,9 @@ if __name__ == '__main__':
     for sub_results in all_results:
         final_results.extend(sub_results)
 
-    with open(os.path.join(OUTPUT_DIR, f"results_{mode}.json"), 'w') as f:
+    output_filename = f"results_emb{Q_EMBED}_vis{Q_VISION}_dec{Q_DECODER}_{mode}.json"
+
+    with open(os.path.join(OUTPUT_DIR, output_filename), 'w') as f:
         json.dump(final_results, f, indent=4)
 
-    print(f"Completed inference on {len(final_results)} questions. Results saved to {OUTPUT_DIR}/results_{mode}.json")
+    print(f"Completed inference on {len(final_results)} questions. Results saved to {OUTPUT_DIR}/{output_filename}")
