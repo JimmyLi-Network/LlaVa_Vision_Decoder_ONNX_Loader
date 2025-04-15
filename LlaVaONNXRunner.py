@@ -318,14 +318,7 @@ def extract_vision_features(vision_sess, vision_metadata, visual_input, input_ty
             processed_features_list.append(processed_features)
         
         # Use mean pooling for images
-        # final_vision_features = np.mean(np.stack(processed_features_list, axis=0), axis=0)
-
-        # Use temporal pooling for images
-        final_vision_features = temporal_pooling(processed_features_list,
-                                                    config['TEMPORAL_POOLING_METHOD'],
-                                                    config['TEMPORAL_ATTENTION_HEADS'],
-                                                    config['TEMPORAL_ATTENTION_TYPE'])
-
+        final_vision_features = np.mean(np.stack(processed_features_list, axis=0), axis=0)
 
     elif input_type == 'video':
         if not isinstance(visual_input, list) or not visual_input:
