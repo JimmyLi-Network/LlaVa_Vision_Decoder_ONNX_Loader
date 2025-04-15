@@ -104,17 +104,13 @@ def get_vision_transform(image_size):
         transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]), # Adjust normalization if needed
     ])
 
-def preprocess_image(image_path, transform):
-    """ Loads and preprocesses a single image. """
-    if not os.path.exists(image_path):
-        raise FileNotFoundError(f"Input image file not found: {image_path}")
-    try:
-        # print(f"Processing single image: {image_path}...") # Optional print
-        image = Image.open(image_path).convert("RGB")
-        image_tensor = transform(image).unsqueeze(0).numpy()
-        return image_tensor
-    except Exception as e:
-        raise RuntimeError(f"Failed to process image '{image_path}': {e}")
+def preprocess_images(images, transform):
+    image_tensors = []
+    for image in images:
+        image_rgb = Image.open(image).convert("RGB")
+        image_tensor = transform(image_rgb).unsqueeze(0).numpy()
+        image_tensors.append(image_tensor)
+    return image_tensors
 
 def sample_video_frames(video_path, num_frames_to_sample):
     """ Samples frames uniformly from a video file. """
@@ -313,11 +309,14 @@ def extract_vision_features(vision_sess, vision_metadata, visual_input, input_ty
     enable_spatial_reduction = config['ENABLE_SPATIAL_REDUCTION']
 
     if input_type == 'image':
-        raw_vision_features = run_vision_encoder(vision_sess, vision_metadata, visual_input)
-        processed_features = raw_vision_features
-        if enable_spatial_reduction:
-            processed_features = spatial_reduction_striding(raw_vision_features, original_spatial_side, target_spatial_side)
-        final_vision_features = processed_features
+        processed_features_list = []
+        for i, image_tensor in enumerate(visual_input):
+            raw_vision_features = run_vision_encoder(vision_sess, vision_metadata, image_tensor)
+            processed_features = raw_vision_features
+            if enable_spatial_reduction:
+                processed_features = spatial_reduction_striding(raw_vision_features, original_spatial_side, target_spatial_side)
+            processed_features_list.append(processed_features)
+        final_vision_features = np.mean(np.stack(processed_features_list, axis=0), axis=0)
 
     elif input_type == 'video':
         if not isinstance(visual_input, list) or not visual_input:
@@ -815,7 +814,7 @@ class VisionLanguageModelONNX:
         return fallback_dim
 
     def generate(self,
-                 input_path: str,
+                 inputs: str,
                  user_prompt: str,
                  input_type: str = 'image',
                  system_prompt: str = None,
@@ -842,8 +841,8 @@ class VisionLanguageModelONNX:
         start_time = time.time()
         run_config = self.config.copy() # Effective config for this run
         run_config['INPUT_TYPE'] = input_type
-        if input_type == 'image': run_config['IMAGE_PATH'] = input_path; run_config['USER_PROMPT_IMAGE'] = user_prompt
-        elif input_type == 'video': run_config['VIDEO_PATH'] = input_path; run_config['USER_PROMPT_VIDEO'] = user_prompt
+        if input_type == 'image': run_config['IMAGES_PATH'] = inputs; run_config['USER_PROMPT_IMAGE'] = user_prompt
+        elif input_type == 'video': run_config['VIDEO_PATH'] = inputs; run_config['USER_PROMPT_VIDEO'] = user_prompt
         else: print(f"Error: Invalid input_type '{input_type}'.", file=sys.stderr); return None, 0
 
         # Apply overrides
@@ -881,7 +880,7 @@ class VisionLanguageModelONNX:
             text_input_ids = prepare_text_input(self.tokenizer, run_config['SYSTEM_PROMPT'], current_user_prompt, run_config['IMAGE_TOKEN_ID'])
 
             visual_input_processed = None
-            if input_type == 'image': visual_input_processed = preprocess_image(run_config['IMAGE_PATH'], self.vision_transform)
+            if input_type == 'image': visual_input_processed = preprocess_images(run_config['IMAGES_PATH'], self.vision_transform)
             elif input_type == 'video':
                  sampled_frames_pil, _ = sample_video_frames(run_config['VIDEO_PATH'], run_config['NUM_FRAMES_TO_SAMPLE'])
                  visual_input_processed = preprocess_video_frames(sampled_frames_pil, self.vision_transform)

@@ -5,7 +5,7 @@ from LlaVaONNXRunner import VisionLanguageModelONNX
 
 # --- Configure Paths and Settings ---
 MODEL_DIR = os.path.join('.', 'models', 'onnx') # MODIFY
-INPUT_FILE = "RTX4090_PCB.png" # MODIFY (or a .mp4 video file)
+INPUT_FILES = ["RTX4090_PCB.png", "RTX4090_PCB.png"] # MODIFY (or a .mp4 video file)
 INPUT_TYPE = 'image'   # MODIFY ('image' or 'video')
 USER_PROMPT = "Describe the image." # MODIFY
 
@@ -31,9 +31,9 @@ try:
     print("Model loaded.")
 
     # --- Run Inference ---
-    print(f"Running inference on {INPUT_FILE} (Type: {INPUT_TYPE})...")
+    print(f"Running inference on {INPUT_FILES} (Type: {INPUT_TYPE})...")
     generated_text, gen_time = model.generate(
-        input_path=INPUT_FILE,
+        inputs=INPUT_FILES,
         user_prompt=USER_PROMPT,
         input_type=INPUT_TYPE,
         decoding_strategy=DECODING_STRATEGY,
