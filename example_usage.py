@@ -5,9 +5,9 @@ from LlaVaONNXRunner import VisionLanguageModelONNX
 
 # --- Configure Paths and Settings ---
 MODEL_DIR = os.path.join('.', 'models', 'onnx') # MODIFY
-INPUT_FILES = ["RTX4090_PCB.png", "RTX4090_PCB.png"] # MODIFY (or a .mp4 video file)
+INPUT_FILES = ["RTX4090_PCB.png", "biden.jpg"] # MODIFY (or a .mp4 video file)
 INPUT_TYPE = 'image'   # MODIFY ('image' or 'video')
-USER_PROMPT = "Describe the image." # MODIFY
+USER_PROMPT = "Describe the two images." # MODIFY
 
 # --- Quantization Settings ---
 Q_EMBED = "q4f16"
