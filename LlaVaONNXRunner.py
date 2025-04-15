@@ -316,7 +316,16 @@ def extract_vision_features(vision_sess, vision_metadata, visual_input, input_ty
             if enable_spatial_reduction:
                 processed_features = spatial_reduction_striding(raw_vision_features, original_spatial_side, target_spatial_side)
             processed_features_list.append(processed_features)
-        final_vision_features = np.mean(np.stack(processed_features_list, axis=0), axis=0)
+        
+        # Use mean pooling for images
+        # final_vision_features = np.mean(np.stack(processed_features_list, axis=0), axis=0)
+
+        # Use temporal pooling for images
+        final_vision_features = temporal_pooling(processed_features_list,
+                                                    config['TEMPORAL_POOLING_METHOD'],
+                                                    config['TEMPORAL_ATTENTION_HEADS'],
+                                                    config['TEMPORAL_ATTENTION_TYPE'])
+
 
     elif input_type == 'video':
         if not isinstance(visual_input, list) or not visual_input:
