@@ -67,11 +67,11 @@ def run_inference(args):
     for v in questions_subset:
         q_id = v['questionId']
         USER_PROMPT = v['question']
-        INPUT_FILE = os.path.join(DATASET_DIR, v['image_local_name'])
+        INPUT_FILES = [os.path.join(DATASET_DIR, v['image_local_name'])]
 
-        logger.info(f"Processing Question: {USER_PROMPT} | Image: {INPUT_FILE}")
+        logger.info(f"Processing Question: {USER_PROMPT} | Images: {INPUT_FILES}")
         generated_text, gen_time = model.generate(
-            input_path=INPUT_FILE,
+            inputs=INPUT_FILES,
             user_prompt=USER_PROMPT,
             input_type=INPUT_TYPE,
             decoding_strategy=DECODING_STRATEGY,
