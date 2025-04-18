@@ -22,7 +22,7 @@ output_file = os.path.splitext(input_file)[0] + "_eval.txt"
 
 # 读取 JSON 文件
 try:
-    with open(input_file, 'r') as f:
+    with open(input_file, 'r', encoding='utf-8') as f:
         data = json.load(f)
 except json.JSONDecodeError:
     print(f"Error: '{input_file}' is not a valid JSON file")
@@ -31,7 +31,7 @@ except json.JSONDecodeError:
 # 评估结果
 results = []
 correct_count = 0
-total_count = 0  # 只统计成功运行的样本
+total_count = 0  # 只统计有效响应的样本
 all_samples_count = len(data)  # 所有样本（包括错误）
 
 # 遍历每个样本
@@ -68,28 +68,38 @@ Correct answer (ground truth): {gt_option}
 
 Determine if the model's answer is correct. The model's answer is correct if it matches the ground truth option exactly or clearly indicates the same option (e.g., by reproducing the option text or selecting the corresponding letter).
 
-Respond with a JSON object:
-{{
-    "id": "{id}",
-    "is_correct": true/false,
-    "explanation": "Brief explanation of your judgment"
-}}
+Respond with exactly one word: "correct" if the answer is correct, "incorrect" if it is not. Do not include any other text, explanation, or formatting.
 """
 
     # 调用 Ollama 的 gemma3:27b 模型
     try:
         response = ollama.chat(
             model='gemma3:27b',
-            messages=[{'role': 'user', 'content': prompt}]
+            messages=[{'role': 'user', 'content': prompt}],
+            options={'temperature': 0.2, 'top_p': 0.9, 'max_tokens': 50}
         )
-        # 解析 LLM 响应
-        result = json.loads(response['message']['content'])
-        results.append(result)
-        total_count += 1
-        if result['is_correct']:
+        content = response['message']['content'].strip().lower()
+        # 检查响应
+        if content == 'correct':
+            results.append({
+                "id": id,
+                "is_correct": True,
+                "explanation": "Model judged the answer as correct"
+            })
+            total_count += 1
             correct_count += 1
-    except (json.JSONDecodeError, KeyError) as e:
-        print(f"Error parsing LLM response for id {id}: {response['message']['content']}")
+        elif content == 'incorrect':
+            results.append({
+                "id": id,
+                "is_correct": False,
+                "explanation": "Model judged the answer as incorrect"
+            })
+            total_count += 1
+        else:
+            print(f"Invalid LLM response for id {id}: {content}")
+            continue
+    except Exception as e:
+        print(f"Error calling LLM for id {id}: {str(e)}")
         continue
 
 # 准备输出内容
@@ -109,7 +119,7 @@ for line in output_content:
 
 # 写入文件
 try:
-    with open(output_file, 'w') as f:
+    with open(output_file, 'w', encoding='utf-8') as f:
         f.write('\n'.join(output_content))
     print(f"\nResults written to {output_file}")
 except IOError as e:
