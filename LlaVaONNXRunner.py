@@ -107,7 +107,7 @@ def get_vision_transform(image_size):
 def preprocess_images(images, transform):
     image_tensors = []
     for image in images:
-        image_rgb = Image.open(image).convert("RGB")
+        image_rgb = image.convert("RGB") if isinstance(image, Image.Image) else Image.open(image).convert("RGB")
         image_tensor = transform(image_rgb).unsqueeze(0).numpy()
         image_tensors.append(image_tensor)
     return image_tensors
