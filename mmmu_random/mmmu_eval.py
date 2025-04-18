@@ -31,7 +31,8 @@ except json.JSONDecodeError:
 # 评估结果
 results = []
 correct_count = 0
-total_count = len(data)
+total_count = 0  # 只统计成功运行的样本
+all_samples_count = len(data)  # 所有样本（包括错误）
 
 # 遍历每个样本
 for sample in data:
@@ -46,11 +47,6 @@ for sample in data:
         options = ast.literal_eval(options_str)
     except (ValueError, SyntaxError):
         print(f"Error parsing options for id {id}: {options_str}")
-        results.append({
-            "id": id,
-            "is_correct": False,
-            "explanation": "Failed to parse options"
-        })
         continue
 
     # 映射 gt_answer (A/B/C/D) 到选项内容
@@ -59,11 +55,6 @@ for sample in data:
         gt_option = options[gt_index]
     except (IndexError, TypeError):
         print(f"Error mapping gt_answer for id {id}: {gt_answer}")
-        results.append({
-            "id": id,
-            "is_correct": False,
-            "explanation": "Invalid gt_answer or options index"
-        })
         continue
 
     # 构造提示
@@ -85,30 +76,28 @@ Respond with a JSON object:
 }}
 """
 
-    # 调用 Ollama 的 qwq:latest 模型
+    # 调用 Ollama 的 gemma3:27b 模型
     try:
         response = ollama.chat(
-            model='qwq:latest',
+            model='gemma3:27b',
             messages=[{'role': 'user', 'content': prompt}]
         )
         # 解析 LLM 响应
         result = json.loads(response['message']['content'])
         results.append(result)
+        total_count += 1
         if result['is_correct']:
             correct_count += 1
     except (json.JSONDecodeError, KeyError) as e:
         print(f"Error parsing LLM response for id {id}: {response['message']['content']}")
-        results.append({
-            "id": id,
-            "is_correct": False,
-            "explanation": f"Failed to parse LLM response: {str(e)}"
-        })
+        continue
 
 # 准备输出内容
 output_content = []
-output_content.append(f"Total samples: {total_count}")
+output_content.append(f"All samples: {all_samples_count}")
+output_content.append(f"Valid samples: {total_count}")
 output_content.append(f"Correct samples: {correct_count}")
-output_content.append(f"Accuracy: {correct_count / total_count:.2%}")
+output_content.append(f"Accuracy: {correct_count / total_count:.2%}" if total_count > 0 else "Accuracy: N/A (no valid samples)")
 output_content.append("")  # 空行
 output_content.append("Detailed results:")
 for result in results:
