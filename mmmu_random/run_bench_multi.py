@@ -37,8 +37,6 @@ def run_inference(args):
     results = []
 
     for v in questions_subset:
-        if v['image_2'] is not None:
-            continue
         q_id = v['id']
         question = re.sub(r'<image \d+>', '', v['question'])
         USER_PROMPT = f"Question: {question} You need to choose one of the following options: {v['options']}. Answer: "
@@ -60,9 +58,10 @@ def run_inference(args):
 
 if __name__ == '__main__':
     questions_per_gpu = len(ds) // NUM_GPUS
-    question_splits = [ds[i * questions_per_gpu:(i + 1) * questions_per_gpu] for i in range(NUM_GPUS)]
+    question_arr = [ds[i] for i in range(len(ds)) if ds[i]['image_2'] is None]
+    question_splits = [question_arr[i * questions_per_gpu:(i + 1) * questions_per_gpu] for i in range(NUM_GPUS)]
     if len(ds) % NUM_GPUS != 0:
-        question_splits[-1].extend(ds[NUM_GPUS * questions_per_gpu:])
+        question_splits[-1].extend(question_arr[NUM_GPUS * questions_per_gpu:])
 
     with mp.Pool(processes=NUM_GPUS) as pool:
         all_results = pool.map(run_inference, [(i, split) for i, split in enumerate(question_splits)])
