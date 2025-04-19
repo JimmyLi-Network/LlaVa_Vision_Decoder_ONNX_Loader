@@ -64,7 +64,7 @@ def run_inference(args):
 
         if generated_text:
             print(f"Generated Text: {generated_text}")
-            results.append({'id': q_id, 'question': question, 'options': v['options'], 'answer': generated_text, 'gt_answer': v['answer']})
+            results.append({'id': q_id, 'question': question, 'options': options, 'answer': generated_text, 'gt_answer': v['answer']})
 
     model.close()
 
