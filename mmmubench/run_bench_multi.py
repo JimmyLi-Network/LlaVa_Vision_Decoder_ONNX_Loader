@@ -37,7 +37,7 @@ def run_inference(args):
     for v in questions_subset:
         q_id = v['id']
         question = re.sub(r'<image \d+>', '', v['question'])
-        choices = v['options']
+        choices = json.loads(v['options'])
         if len(choices) == 0:
             print(f"Skipping question {q_id} due to empty options.")
             continue
