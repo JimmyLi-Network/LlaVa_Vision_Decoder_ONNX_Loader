@@ -23,8 +23,8 @@ def loose_match(ans, gt):
     return re.search(pattern, ans.upper()) is not None
 
 def ask_ollama(answer, gt_answer, options):
-    prompt = f"""You are a strict multiple choice grader.
-    Question options: {options}
+    prompt = f"""You are a strict grader.
+    There are multiple correct answers for this question, as long as the student answer is in the ground truth answer list, it is correct.
     Ground truth answer: {gt_answer}
     Student answer: {answer}
 
