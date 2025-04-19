@@ -3,9 +3,9 @@
 # Default directory is current directory
 INPUT_DIR="ocrbench/model_outputs"
 
-# Check if llm_judge.py exists
-if [ ! -f "llm_judge.py" ]; then
-    echo "Error: llm_judge.py not found in the current directory."
+# Check if llm_judge_ocr.py exists
+if [ ! -f "llm_judge_ocr.py" ]; then
+    echo "Error: llm_judge_ocr.py not found in the current directory."
     exit 1
 fi
 
@@ -30,8 +30,8 @@ echo "Found $(echo "$JSON_FILES" | wc -l) JSON files to process."
 for json_file in $JSON_FILES; do
     echo "Processing $json_file..."
 
-    # Run llm_judge.py
-    if python3 llm_judge.py "$json_file"; then
+    # Run llm_judge_ocr.py
+    if python3 llm_judge_ocr.py "$json_file"; then
         echo "Successfully processed $json_file"
         # Display the summary from the output file
         output_file="$(dirname "$json_file")/$(basename "$json_file" .json)_eval.txt"
