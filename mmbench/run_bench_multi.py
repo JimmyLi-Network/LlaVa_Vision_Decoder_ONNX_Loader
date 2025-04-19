@@ -66,7 +66,7 @@ def run_inference(args):
     return results
 
 if __name__ == '__main__':
-    question_arr = [ds[i] for i in range(len(ds))][:2000]
+    question_arr = [ds[i] for i in range(len(ds))]
     questions_per_gpu = len(question_arr) // NUM_GPUS
     question_splits = [question_arr[i * questions_per_gpu:(i + 1) * questions_per_gpu] for i in range(NUM_GPUS)]
     if len(question_arr) % NUM_GPUS != 0:
