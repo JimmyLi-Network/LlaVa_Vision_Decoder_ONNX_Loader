@@ -55,8 +55,9 @@ def run_inference(args):
         prompt = processor.apply_chat_template(conversation, add_generation_prompt=True)
         inputs = processor(images=INPUT_FILE, text=prompt, return_tensors='pt').to(gpu_id, torch.float16)
 
-        output = model.generate(**inputs, max_new_tokens=200, do_sample=False)
-        generated_text = processor.decode(output[0][2:], skip_special_tokens=True)
+        output = model.generate(**inputs, max_new_tokens=200, do_sample=True, temperature=1.0, top_k=50, top_p=0.95)
+        generated_text = processor.decode(output[0][2:], skip_special_tokens=True).strip()
+        generated_text = generated_text.replace("assistant:", "").replace("Assistant:", "").strip()
 
         if generated_text:
             print(f"Generated Text: {generated_text}")
