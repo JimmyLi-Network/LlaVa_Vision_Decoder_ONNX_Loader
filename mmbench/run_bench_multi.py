@@ -40,10 +40,10 @@ def run_inference(args):
         q_id = v['index']
         question = v['question']
         options = f"A: {v['A']}. B: {v['B']}. C: {v['C']}. D: {v['D']}."
-        USER_PROMPT = f"""You are provided with a question and several options. Your should output a single
-            uppercase character in A, B, C, D. 
+        USER_PROMPT = f"""You are provided with a question and several options. 
+            Your should output a single uppercase character in A, B, C, D. 
             Question: {question} 
-            You need to choose one of the following options: f{options}
+            You need to choose one of the following options: {options}
             Answer: 
             """
         INPUT_FILES = [v['image']]
@@ -58,6 +58,7 @@ def run_inference(args):
         )
 
         if generated_text:
+            print(f"Generated Text: {generated_text}")
             results.append({'id': q_id, 'question': question, 'options': options, 'answer': generated_text, 'gt_answer': f"{v['answer']}: {v[v['answer']]}"})
 
     model.close()
