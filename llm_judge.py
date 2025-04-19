@@ -8,8 +8,7 @@ MODEL_NAME = "gemma:3-27b"
 
 def load_data(json_path):
     with open(json_path, 'r', encoding='utf-8') as f:
-        text = f.read()
-        data = json.loads(f'[{text}]')
+        data = json.load(f)
     return data
 
 def simple_match(ans, gt):
@@ -37,8 +36,8 @@ def grade_item(item):
 
     if simple_match(ans, gt):
         return True, "strict"
-    if loose_match(ans, gt):
-        return True, "fuzzy"
+    # if loose_match(ans, gt):
+    #     return True, "fuzzy"
     if ask_ollama(ans, gt, options):
         return True, "ollama"
     return False, "wrong"
