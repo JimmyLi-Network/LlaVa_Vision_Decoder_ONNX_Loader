@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, ast
 import json, re
 import multiprocessing as mp
 import argparse
@@ -37,7 +37,7 @@ def run_inference(args):
     for v in questions_subset:
         q_id = v['id']
         question = re.sub(r'<image \d+>', '', v['question'])
-        choices = json.loads(v['options'])
+        choices = ast.literal_eval(v['options'])
         if len(choices) == 0:
             print(f"Skipping question {q_id} due to empty options.")
             continue
