@@ -30,8 +30,8 @@ for q_embed in "${Q_EMBED_ARRAY[@]}"; do
         for q_decoder in "${Q_DECODER_ARRAY[@]}"; do
             echo "Running combination: Q_EMBED=$q_embed, Q_VISION=$q_vision, Q_DECODER=$q_decoder" | tee -a "$LOG_FILE"
             
-            # Run the Python script with the current combination, redirecting output to both terminal and log
-            python3 "$PYTHON_SCRIPT" --q_embed "$q_embed" --q_vision "$q_vision" --q_decoder "$q_decoder" 2>&1 | tee -a "$LOG_FILE"
+            # Run the Python script with the current combination, redirecting output to terminal
+            python3 "$PYTHON_SCRIPT" --q_embed "$q_embed" --q_vision "$q_vision" --q_decoder "$q_decoder"
             
             # Check if the command was successful
             if [ ${PIPESTATUS[0]} -eq 0 ]; then

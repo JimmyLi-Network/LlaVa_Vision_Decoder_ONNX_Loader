@@ -16,7 +16,7 @@ if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
 NUM_GPUS = 8
 
-ds = load_dataset("lmms-lab/MMMU_random_100")['validation']
+ds = load_dataset("lmms-lab/MMMU")['validation']
 
 INPUT_TYPE = 'image'
 DECODING_STRATEGY = "sampling"
@@ -38,6 +38,9 @@ def run_inference(args):
         q_id = v['id']
         question = re.sub(r'<image \d+>', '', v['question'])
         choices = v['options']
+        if len(choices) == 0:
+            print(f"Skipping question {q_id} due to empty options.")
+            continue
         c1 = choices[0]
         c2 = choices[1] if len(choices) > 1 else None
         c3 = choices[2] if len(choices) > 2 else None
