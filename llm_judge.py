@@ -1,4 +1,5 @@
 import json
+import os
 import ollama
 import re
 from pathlib import Path
@@ -57,8 +58,10 @@ def main(input_file):
         Correct Answers: {correct_count}
         Accuracy: {score:.2f}%"""
     
+    print(summary)
+    
     # Write summary to output file
-    output_file = f"{Path(input_file).stem}_eval.txt"
+    output_file = os.path.splitext(input_file)[0] + "_eval.txt"
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write(summary)
 
