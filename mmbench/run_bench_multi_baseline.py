@@ -67,7 +67,7 @@ def run_inference(args):
 
 if __name__ == '__main__':
     questions_per_gpu = len(ds) // NUM_GPUS
-    question_arr = [ds[i] for i in range(len(ds)) if ds[i]['image_2'] is None]
+    question_arr = [ds[i] for i in range(len(ds))]
     question_splits = [question_arr[i * questions_per_gpu:(i + 1) * questions_per_gpu] for i in range(NUM_GPUS)]
     if len(ds) % NUM_GPUS != 0:
         question_splits[-1].extend(question_arr[NUM_GPUS * questions_per_gpu:])
