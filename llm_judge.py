@@ -4,7 +4,7 @@ import sys
 import os
 import ollama
 
-MODEL_NAME = "gemma:3-27b"
+MODEL_NAME = "gemma3:27b"
 
 def load_data(json_path):
     with open(json_path, 'r', encoding='utf-8') as f:
