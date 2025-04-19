@@ -1,6 +1,7 @@
 import os, sys
 import json, re
 import multiprocessing as mp
+import argparse
 
 from datasets import load_dataset
 
@@ -18,19 +19,16 @@ NUM_GPUS = 8
 ds = load_dataset("lmms-lab/MMBench", "en")['dev']
 
 INPUT_TYPE = 'image'
-Q_EMBED = "q4f16"
-Q_VISION = "fp16"
-Q_DECODER = "q4f16"
 DECODING_STRATEGY = "sampling"
 
 def run_inference(args):
-    gpu_id, questions_subset = args
+    gpu_id, questions_subset, q_embed, q_vision, q_decoder = args
 
     model = VisionLanguageModelONNX(
         base_model_dir=MODEL_DIR,
-        quant_type_embed=Q_EMBED,
-        quant_type_vision=Q_VISION,
-        quant_type_decoder=Q_DECODER,
+        quant_type_embed=q_embed,
+        quant_type_vision=q_vision,
+        quant_type_decoder=q_decoder,
         ort_providers=[('CUDAExecutionProvider', {'device_id': str(gpu_id)}), 'CPUExecutionProvider']
     )
 
@@ -66,6 +64,13 @@ def run_inference(args):
     return results
 
 if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description="Run inference on MMBench dataset with ONNX vision-language model.")
+    parser.add_argument('--q_embed', type=str, default='q4f16', help='Quantization type for embeddings (e.g., q4f16)')
+    parser.add_argument('--q_vision', type=str, default='fp16', help='Quantization type for vision model (e.g., fp16)')
+    parser.add_argument('--q_decoder', type=str, default='q4f16', help='Quantization type for decoder (e.g., q4f16)')
+    args = parser.parse_args()
+
     question_arr = [ds[i] for i in range(len(ds))]
     questions_per_gpu = len(question_arr) // NUM_GPUS
     question_splits = [question_arr[i * questions_per_gpu:(i + 1) * questions_per_gpu] for i in range(NUM_GPUS)]
@@ -73,13 +78,13 @@ if __name__ == '__main__':
         question_splits[-1].extend(question_arr[NUM_GPUS * questions_per_gpu:])
 
     with mp.Pool(processes=NUM_GPUS) as pool:
-        all_results = pool.map(run_inference, [(i, split) for i, split in enumerate(question_splits)])
+        all_results = pool.map(run_inference, [(i, split, args.q_embed, args.q_vision, args.q_decoder) for i, split in enumerate(question_splits)])
 
     final_results = []
     for sub_results in all_results:
         final_results.extend(sub_results)
 
-    output_filename = f"results_emb{Q_EMBED}_vis{Q_VISION}_dec{Q_DECODER}.json"
+    output_filename = f"results_emb{args.q_embed}_vis{args.q_vision}_dec{args.q_decoder}.json"
 
     with open(os.path.join(OUTPUT_DIR, output_filename), 'w') as f:
         json.dump(final_results, f, indent=4)
