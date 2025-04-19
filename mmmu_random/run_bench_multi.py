@@ -39,8 +39,21 @@ def run_inference(args):
     for v in questions_subset:
         q_id = v['id']
         question = re.sub(r'<image \d+>', '', v['question'])
-        USER_PROMPT = f"Question: {question} You need to choose one of the following options: {v['options']}. Answer: "
+        choices = v['options']
+        c1 = choices[0]
+        c2 = choices[1] if len(choices) > 1 else None
+        c3 = choices[2] if len(choices) > 2 else None
+        c4 = choices[3] if len(choices) > 3 else None
+        options = f"A: {c1}. B: {c2}. C: {c3}. D: {c4}."
+        USER_PROMPT = f"""You are provided with a question and several options. 
+            Your should output a single uppercase character in A, B, C, D. 
+            Question: {question} 
+            You need to choose one of the following options: {options}
+            Answer: 
+            """
         INPUT_FILES = [v['image_1']]
+
+        print(f"Processing Question: {USER_PROMPT} | Images: {INPUT_FILES}")
 
         generated_text, _ = model.generate(
             inputs=INPUT_FILES,
@@ -50,6 +63,7 @@ def run_inference(args):
         )
 
         if generated_text:
+            print(f"Generated Text: {generated_text}")
             results.append({'id': q_id, 'question': question, 'options': v['options'], 'answer': generated_text, 'gt_answer': v['answer']})
 
     model.close()

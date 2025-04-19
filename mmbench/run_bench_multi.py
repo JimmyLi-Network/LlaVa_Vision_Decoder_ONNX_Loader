@@ -15,7 +15,7 @@ if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
 NUM_GPUS = 8
 
-ds = load_dataset("lmms-lab/MMBench", "en")['dev']
+ds = load_dataset("lmms-lab/MMBench", "en")['test']
 
 INPUT_TYPE = 'image'
 Q_EMBED = "q4f16"
@@ -59,7 +59,7 @@ def run_inference(args):
 
         if generated_text:
             print(f"Generated Text: {generated_text}")
-            results.append({'id': q_id, 'question': question, 'options': options, 'answer': generated_text, 'gt_answer': f"{v['answer']}: {v[v['answer']]}"})
+            results.append({'id': q_id, 'question': question, 'options': options, 'answer': generated_text, 'gt_answer': v['answer']})
 
     model.close()
 
